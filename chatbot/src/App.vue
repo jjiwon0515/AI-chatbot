@@ -32,6 +32,48 @@ const sendMessage = async () => {
     await nextTick()
     scrollToBottom()
 
+    if (text === '안녕?') {
+  botReplies.value[currentIndex] = '안녕하세요😊 좋은 하루 입니다!'
+  scrollToBottom()
+  return
+  } else if (text === '이름이 뭐야?') {
+  botReplies.value[currentIndex] = '저는 삼육대학교 챗봇 수아입니다 :)'
+  scrollToBottom()
+  return
+  } else if (text === '뭐해?') {
+  botReplies.value[currentIndex] = '대화하는 중 입니다~ 🗨️'
+  scrollToBottom()
+  return
+  } else if (text === '심심해') {
+  botReplies.value[currentIndex] = '저랑 수다 떨어요! 수다는 언제나 환영이에요 :)'
+  scrollToBottom()
+  return
+  } else if (text === '힘들어') {
+  botReplies.value[currentIndex] = '제가 옆에 있어드릴게요! 같이 이겨내봐요 :)'
+  scrollToBottom()
+  return
+  } else if (text === '배고파') {
+  botReplies.value[currentIndex] = '밥을 든든히 드셔야해요. 저랑 메뉴 얘기하실래요? 🍙'
+  scrollToBottom()
+  return
+  } else if (text === '바보야') {
+  botReplies.value[currentIndex] = '으엥! 수아는 바보가 아니에요!!'
+  scrollToBottom()
+  return
+  } else if (text === '공부하기 싫어') {
+  botReplies.value[currentIndex] = '수아도 가끔 그래요... 그래도 조금만 더 힘내봐요 💪'
+  scrollToBottom()
+  return
+  } else if (text === '오늘 날씨 어때?') {
+  botReplies.value[currentIndex] = '날씨 정보는 아직 모르겠어요 :('
+  scrollToBottom()
+  return
+  } else if (text === '고마워') {
+  botReplies.value[currentIndex] = '천만에요! 언제든지 필요하면 저를 찾아주세요 🙌'
+  scrollToBottom()
+  return
+  }
+  
     await fetchGptReply(text, currentIndex)
   }
 }
@@ -47,19 +89,22 @@ const handleSelection = async (label) => {
 }
 
 // OpenAI API를 통해 답변 받기
-// OpenAI GPT 응답을 Flask RAG API로부터 받기
 const fetchGptReply = async (prompt, index) => {
   try {
-    const response = await fetch('http://localhost:8081/api/ask', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
-      },  
-      body: JSON.stringify({ question: prompt })
+        'Content-Type': 'application/json',
+        Authorization: `Bearer YOUR_API_KEY`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+      }),
     })
 
     const data = await response.json()
-    const reply = data.answer || '답변을 불러오지 못했습니다.'
+    const reply = data.choices?.[0]?.message?.content?.trim() || '죄송합니다. 아직 배우지 못한 말입니다 :('
     botReplies.value[index] = reply
     await nextTick()
     scrollToBottom()
@@ -69,7 +114,6 @@ const fetchGptReply = async (prompt, index) => {
   }
 }
 
-
 // 메시지 스크롤 자동화
 const scrollToBottom = () => {
   if (messageContainer.value) {
@@ -77,6 +121,19 @@ const scrollToBottom = () => {
   }
 }
 
+// 데이터베이스에서 restaurants 데이터 가져오기
+const fetchRestaurants = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/restaurants')
+    const data = await response.json()
+    restaurants.value = data  // 가져온 데이터를 Vue의 상태로 저장
+  } catch (error) {
+    console.error("데이터를 가져오는 데 실패했습니다.", error)
+  }
+}
+
+// 컴포넌트 마운트 후 데이터 가져오기
+fetchRestaurants()
 </script>
 
 <template>
