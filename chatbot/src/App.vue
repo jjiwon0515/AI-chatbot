@@ -47,22 +47,19 @@ const handleSelection = async (label) => {
 }
 
 // OpenAI API를 통해 답변 받기
+// OpenAI GPT 응답을 Flask RAG API로부터 받기
 const fetchGptReply = async (prompt, index) => {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('http://localhost:8081/api/ask', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer YOUR_API_KEY`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-      }),
+        'Content-Type': 'application/json'
+      },  
+      body: JSON.stringify({ question: prompt })
     })
 
     const data = await response.json()
-    const reply = data.choices?.[0]?.message?.content?.trim() || '답변을 불러오지 못했습니다.'
+    const reply = data.answer || '답변을 불러오지 못했습니다.'
     botReplies.value[index] = reply
     await nextTick()
     scrollToBottom()
@@ -72,6 +69,7 @@ const fetchGptReply = async (prompt, index) => {
   }
 }
 
+
 // 메시지 스크롤 자동화
 const scrollToBottom = () => {
   if (messageContainer.value) {
@@ -79,19 +77,6 @@ const scrollToBottom = () => {
   }
 }
 
-// 데이터베이스에서 restaurants 데이터 가져오기
-const fetchRestaurants = async () => {
-  try {
-    const response = await fetch('http://localhost:5000/restaurants')
-    const data = await response.json()
-    restaurants.value = data  // 가져온 데이터를 Vue의 상태로 저장
-  } catch (error) {
-    console.error("데이터를 가져오는 데 실패했습니다.", error)
-  }
-}
-
-// 컴포넌트 마운트 후 데이터 가져오기
-fetchRestaurants()
 </script>
 
 <template>
