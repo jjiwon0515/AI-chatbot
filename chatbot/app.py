@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # ───────── 설정 ─────────
-openai.api_key = "YOUR_OPENAI_API_KEY"  # OpenAI API 키 설정
+openai.api_key = "OPEN API KEY"  # OpenAI API 키 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "unibot_extended.db")
 
@@ -24,35 +24,46 @@ def query_db(sql, params=()):
 # ───────── RAG용 질문 필터 추출 ─────────
 def extract_filters(user_input):
     filters = {}
-    if "졸업" in user_input:
+
+    if any(kw in user_input for kw in ["졸업", "졸업요건", "졸업 조건", "졸업 기준"]):
         filters["table"] = "graduation_credits"
-        if "신입" in user_input:
+        if "신입" in user_input or "신입생" in user_input:
             filters["entry_type"] = "신입"
-        elif "편입" in user_input:
+        elif "편입" in user_input or "편입생" in user_input:
             filters["entry_type"] = "편입"
-        elif "전과" in user_input:
+        elif "전과" in user_input or "학과 변경" in user_input:
             filters["entry_type"] = "전과"
+
         if "인공지능" in user_input:
             filters["program"] = "인공지능융합학부"
-        elif "건축" in user_input:
+        elif "건축" in user_input or "건축학" in user_input:
             filters["program"] = "건축학과"
-        elif "약학" in user_input:
+        elif "약학" in user_input or "약대" in user_input:
             filters["program"] = "약학과"
-    elif any(kw in user_input for kw in ["식당", "맛집", "메뉴", "밥", "점심", "저녁", "추천"]):
+
+    elif any(kw in user_input for kw in ["식당", "맛집", "메뉴", "밥", "점심", "저녁", "음식", "추천 식당", "학교 근처 음식"]):
         filters["table"] = "restaurants"
-    elif "교양" in user_input or "추천 과목" in user_input:
+
+    elif any(kw in user_input for kw in ["교양", "교양 과목", "추천 과목", "자유선택", "인기 교양"]):
         filters["table"] = "liberal_arts"
-    elif "이수체계도" in user_input:
+
+    elif any(kw in user_input for kw in ["이수체계도", "전공 과목 흐름", "커리큘럼", "과목 순서", "학과 이수 체계"]):
         filters["table"] = "department_curriculum"
-    elif "학사 일정" in user_input:
+
+    elif any(kw in user_input for kw in ["학사 일정", "학기 일정", "캘린더", "개강일", "시험일정", "방학"]):
         filters["table"] = "academic_calendar"
-    elif "교적" in user_input:
+
+    elif any(kw in user_input for kw in ["교직", "교직이수", "교직 과목", "교직 이수요건", "교사 자격"]):
         filters["table"] = "teacher_education"
-    elif "장학금" in user_input:
+
+    elif any(kw in user_input for kw in ["장학금", "장학", "학비 지원", "장학 요건", "장학제도"]):
         filters["table"] = "scholarships"
-    elif "증명서 발급" in user_input or "증명서" in user_input:
+
+    elif any(kw in user_input for kw in ["증명서 발급", "증명서", "서류 발급", "학교 서류", "확인서", "성적표", "재학증명서"]):
         filters["table"] = "certificates"
+
     return filters if "table" in filters else None
+
 
 # ───────── 테이블별 fetch 및 포맷 ─────────
 def fetch_and_format(table, user_input):

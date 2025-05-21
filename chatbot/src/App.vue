@@ -20,6 +20,8 @@ const predefinedReplies = {
   '졸업요건': '졸업을 위해서는 전공 이수 학점과 교양 과목을 포함한 총 130학점 이상이 필요합니다.',
 }
 
+
+
 // 메시지 상태 관리
 const sendMessage = async () => {
   const text = message.value.trim()
@@ -32,6 +34,48 @@ const sendMessage = async () => {
     await nextTick()
     scrollToBottom()
 
+    if (text === '안녕?') {
+  botReplies.value[currentIndex] = '안녕하세요😊 좋은 하루 입니다!'
+  scrollToBottom()
+  return
+  } else if (text === '이름이 뭐야?') {
+  botReplies.value[currentIndex] = '저는 삼육대학교 챗봇 수아입니다 :)'
+  scrollToBottom()
+  return
+  } else if (text === '뭐해?') {
+  botReplies.value[currentIndex] = '대화하는 중 입니다~ 🗨️'
+  scrollToBottom()
+  return
+  } else if (text === '심심해') {
+  botReplies.value[currentIndex] = '저랑 수다 떨어요! 수다는 언제나 환영이에요 :)'
+  scrollToBottom()
+  return
+  } else if (text === '힘들어') {
+  botReplies.value[currentIndex] = '제가 옆에 있어드릴게요! 같이 이겨내봐요 :)'
+  scrollToBottom()
+  return
+  } else if (text === '배고파') {
+  botReplies.value[currentIndex] = '밥을 든든히 드셔야해요. 저랑 메뉴 얘기하실래요? 🍙'
+  scrollToBottom()
+  return
+  } else if (text === '바보야') {
+  botReplies.value[currentIndex] = '으엥! 수아는 바보가 아니에요!!'
+  scrollToBottom()
+  return
+  } else if (text === '공부하기 싫어') {
+  botReplies.value[currentIndex] = '수아도 가끔 그래요... 그래도 조금만 더 힘내봐요 💪'
+  scrollToBottom()
+  return
+  } else if (text === '오늘 날씨 어때?') {
+  botReplies.value[currentIndex] = '날씨 정보는 아직 모르겠어요 :('
+  scrollToBottom()
+  return
+  } else if (text === '고마워') {
+  botReplies.value[currentIndex] = '천만에요! 언제든지 필요하면 저를 찾아주세요 🙌'
+  scrollToBottom()
+  return
+  }
+  
     await fetchGptReply(text, currentIndex)
   }
 }
