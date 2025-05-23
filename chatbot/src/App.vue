@@ -12,6 +12,18 @@ const messageContainer = ref(null)
 
 const restaurants = ref([])  // 데이터베이스에서 가져온 restaurant 데이터를 저장
 
+// 🏫 삼육대학교 관련 키워드 목록
+const relatedKeywords = [
+  '삼육대', '삼육대학교', '학사', '수강', '시간표', '졸업',
+  '강의', '교수님', '학점', '캠퍼스', '건물', '도서관',
+  '계절학기', '휴학', '복학', '장학금', '교양', '동아리'
+]
+
+// 🔍 키워드 포함 여부 확인 함수
+const isRelatedToSchool = (text) => {
+  return relatedKeywords.some(keyword => text.includes(keyword))
+}
+
 // 사전 정의된 응답
 const predefinedReplies = {
   '점심 메뉴 추천': '오늘의 점심 추천은 김치찌개, 제육볶음, 샐러드입니다!',
@@ -32,48 +44,55 @@ const sendMessage = async () => {
     await nextTick()
     scrollToBottom()
 
-    if (text === '안녕?') {
+    if (text === '안녕?' || text === '안녕.' || text === '안녕') {
   botReplies.value[currentIndex] = '안녕하세요😊 좋은 하루 입니다!'
   scrollToBottom()
   return
-  } else if (text === '이름이 뭐야?') {
+  } else if (text === '이름이 뭐야?' || text === '이름이 뭐니' || text === '니 이름') {
   botReplies.value[currentIndex] = '저는 삼육대학교 챗봇 수아입니다 :)'
   scrollToBottom()
   return
-  } else if (text === '뭐해?') {
-  botReplies.value[currentIndex] = '대화하는 중 입니다~ 🗨️'
+  } else if (text === '뭐해?' || text === '뭐하니' || text === '뭐하고 있어') {
+  botReplies.value[currentIndex] = '대화하는 중이에요~ 🗨️'
   scrollToBottom()
   return
-  } else if (text === '심심해') {
+  } else if (text === '심심해' || text === '심심하다' || text === '심심') {
   botReplies.value[currentIndex] = '저랑 수다 떨어요! 수다는 언제나 환영이에요 :)'
   scrollToBottom()
   return
-  } else if (text === '힘들어') {
+  } else if (text === '힘들어' || text === '힘들다' || text === '지친다') {
   botReplies.value[currentIndex] = '제가 옆에 있어드릴게요! 같이 이겨내봐요 :)'
   scrollToBottom()
   return
-  } else if (text === '배고파') {
+  } else if (text === '배고파'|| text === '배고프다' || text === '꼬르륵') {
   botReplies.value[currentIndex] = '밥을 든든히 드셔야해요. 저랑 메뉴 얘기하실래요? 🍙'
   scrollToBottom()
   return
-  } else if (text === '바보야') {
+  } else if (text === '바보야' || text === '바보' || text === '바보바보') {
   botReplies.value[currentIndex] = '으엥! 수아는 바보가 아니에요!!'
   scrollToBottom()
   return
-  } else if (text === '공부하기 싫어') {
+  } else if (text === '공부하기 싫어' || text === '과제하기 싫어' || text === '일하기 싫어') {
   botReplies.value[currentIndex] = '수아도 가끔 그래요... 그래도 조금만 더 힘내봐요 💪'
   scrollToBottom()
   return
-  } else if (text === '오늘 날씨 어때?') {
+  } else if (text === '오늘 날씨 어때?' || text === '오늘 날씨' || text === '날씨') {
   botReplies.value[currentIndex] = '날씨 정보는 아직 모르겠어요 :('
   scrollToBottom()
   return
-  } else if (text === '고마워') {
+  } else if (text === '고마워' || text === '고맙다' || text === '땡큐') {
   botReplies.value[currentIndex] = '천만에요! 언제든지 필요하면 저를 찾아주세요 🙌'
   scrollToBottom()
   return
   }
   
+  // 🛑 학교 관련 키워드 없으면 차단 응답
+    if (!isRelatedToSchool(text)) {
+      botReplies.value[currentIndex] = '죄송해요! 수아는 삼육대학교 관련 질문만 도와드릴 수 있어요 😊'
+      scrollToBottom()
+      return
+    }
+
     await fetchGptReply(text, currentIndex)
   }
 }
@@ -82,7 +101,7 @@ const sendMessage = async () => {
 const handleSelection = async (label) => {
   userMessages.value.push(label)
   selectionTexts.value.push(label)
-  const reply = predefinedReplies[label] || '죄송합니다. 해당 항목에 대한 정보가 없습니다.'
+  const reply = predefinedReplies[label] || '죄송해요. 해당 항목에 대한 정보가 없어요.'
   botReplies.value.push(reply)
   await nextTick()
   scrollToBottom()
@@ -104,13 +123,13 @@ const fetchGptReply = async (prompt, index) => {
     })
 
     const data = await response.json()
-    const reply = data.choices?.[0]?.message?.content?.trim() || '죄송합니다. 아직 배우지 못한 말입니다 :('
+    const reply = data.choices?.[0]?.message?.content?.trim() || '죄송해요. 아직 배우지 못한 말이에요 :('
     botReplies.value[index] = reply
     await nextTick()
     scrollToBottom()
   } catch (err) {
     console.error(err)
-    botReplies.value[index] = '⚠️ 서버 오류가 발생했습니다.'
+    botReplies.value[index] = '⚠️ 서버 오류가 발생했어요.'
   }
 }
 
