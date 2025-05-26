@@ -1,6 +1,7 @@
 import openai
 import sqlite3
 import os
+import re
 
 # ───────── 설정 ─────────
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -42,15 +43,18 @@ def detect_query_intent(user_input):
         "교양": "liberal_arts",
         "졸업": "graduation_credits", "졸업요건": "graduation_credits",
         "이수체계": "department_curriculum", "학과별": "department_curriculum",
+        "커리큘럼": "department_curriculum", "교과과정": "department_curriculum",
         "장학": "scholarships",
         "증명서": "certificates", "발급": "certificate_issuance",
         "교직": "teacher_education",
         "학사일정": "academic_calendar", "학사 일정": "academic_calendar"
     }
+
     for word, tbl in keywords.items():
         if word in user_input:
             return tbl
     return None
+
 
 # ───────── 테이블별 데이터 추출 ─────────
 def fetch_data_from_table(table_name, user_input=None):
@@ -75,6 +79,8 @@ def ask_openai(question, chat_log=None):
         return f"Error: {e}"
 
 # ───────── 채팅 메인 루프 ─────────
+import re  # 꼭 파일 상단에 import 추가되어 있어야 해
+
 def chat():
     print("💬 챗봇을 시작합니다. 종료하려면 'exit'을 입력하세요.")
     chat_log = []
@@ -86,6 +92,7 @@ def chat():
 
         table = detect_query_intent(user_input)
         et = None
+
         # graduation_credits 특별 분기
         if table == "graduation_credits":
             if "편입" in user_input:
@@ -99,8 +106,22 @@ def chat():
                 col_names, rows = query_db(sql, (et,))
             else:
                 col_names, rows = fetch_data_from_table(table, user_input)
+
+        # academic_calendar 월별 필터링 분기
+        elif table == "academic_calendar":
+            month_match = re.search(r"(\d{1,2})월", user_input)
+            if month_match:
+                month = int(month_match.group(1))
+                sql = "SELECT * FROM academic_calendar WHERE month = ? ORDER BY year, month, start_date"
+                col_names, rows = query_db(sql, (month,))
+            else:
+                col_names, rows = fetch_data_from_table(table, user_input)
+
+        # 일반 테이블
         elif table:
             col_names, rows = fetch_data_from_table(table, user_input)
+
+        # 테이블 감지 실패
         else:
             col_names, rows = [], []
 
@@ -123,12 +144,12 @@ def chat():
             )
 
         # 디버깅
-        print("────────────────────")
-        print("사용자 입력:", user_input)
-        print("감지된 테이블:", table if table else "없음")
-        print("추출된 entry_type:", et if table == "graduation_credits" else "-")
-        print("GPT로 전달된 프롬프트:\n", gpt_prompt)
-        print("────────────────────")
+        # print("────────────────────")
+        # print("사용자 입력:", user_input)
+        # print("감지된 테이블:", table if table else "없음")
+        # print("추출된 entry_type:", et if table == "graduation_credits" else "-")
+        # print("GPT로 전달된 프롬프트:\n", gpt_prompt)
+        # print("────────────────────")
 
         response = ask_openai(gpt_prompt, chat_log)
         print(f"\n AI Bot: {response}\n")
