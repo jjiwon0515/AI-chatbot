@@ -22,12 +22,14 @@ def query_db(sql, params=()):
     return rows
 
 # ───────── RAG용 질문 필터 추출 ─────────
+import re  # 추가 필요
+
 def extract_filters(user_input):
     filters = {}
 
+    # 졸업요건 관련
     if "학점" in user_input or "졸업" in user_input:
         filters["table"] = "graduation_credits"
-
         if "신입" in user_input:
             filters["entry_type"] = "신입"
         elif "편입" in user_input:
@@ -44,38 +46,45 @@ def extract_filters(user_input):
         else:
             filters["program"] = "일반 학과"
 
-        # 필수 조건이 빠졌다면 무효
         if "entry_type" not in filters or "program" not in filters:
             return None
 
+    # 식당 추천
     elif "식당" in user_input or "맛집" in user_input:
         filters["table"] = "restaurants"
 
+    # 교양 과목
     elif "교양" in user_input or "추천 과목" in user_input:
         filters["table"] = "liberal_arts"
 
-    elif "이수체계도" in user_input:
+    # 이수체계도 or 커리큘럼
+    elif any(word in user_input for word in ["이수체계도", "커리큘럼", "교과과정"]):
         filters["table"] = "department_curriculum"
 
+    # 학사일정
     elif "학사 일정" in user_input:
         filters["table"] = "academic_calendar"
+        match = re.search(r"(\d{1,2})월", user_input)
+        if match:
+            filters["month"] = int(match.group(1))  # 예: "5월" → 5
 
+    # 기타
     elif "교직" in user_input or "교직과목" in user_input:
         filters["table"] = "teacher_education"
 
-    elif "장학금" in user_input:
+    elif "장학" in user_input:
         filters["table"] = "scholarships"
 
     elif "증명서 발급" in user_input or "증명서" in user_input:
         filters["table"] = "certificates"
 
-    
-    # graduation_credits만 특별히 조건 필요
+    # graduation_credits만 조건 필수
     if filters.get("table") == "graduation_credits":
         if "entry_type" not in filters or "program" not in filters:
             return None
 
     return filters if "table" in filters else None
+
 
 
 # ───────── 테이블별 fetch 및 포맷 ─────────
@@ -85,7 +94,7 @@ def fetch_and_format(table, user_input):
         if not rows:
             return "식당 정보를 찾지 못했습니다."
         result = "\n\n".join([
-            f"🍽️ {r[0]} ({r[1]})\n- 거리: {r[2]}분, 태그: {r[3]}\n- 설명: {r[4]}"
+            f" {r[0]} ({r[1]})\n- 거리: {r[2]}분, 태그: {r[3]}\n- 설명: {r[4]}"
             for r in rows
         ])
         return f"'{user_input}'에 대한 음식점 추천 정보입니다:\n\n{result}\n\n요약해서 알려줘."
@@ -95,14 +104,14 @@ def fetch_and_format(table, user_input):
         if not rows:
             return "교양 수업 정보를 찾지 못했습니다."
         result = "\n\n".join([
-            f"📘 {r[0]} ({r[1]})\n- 분류: {r[2]}, 학년: {r[3]}\n- 리뷰: {r[4]}"
+            f" {r[0]} ({r[1]})\n- 분류: {r[2]}, 학년: {r[3]}\n- 리뷰: {r[4]}"
             for r in rows
         ])
         return f"'{user_input}'에 대한 교양 과목 정보입니다:\n\n{result}\n\n추천 위주로 요약해줘."
 
     elif table == "department_curriculum":
         rows = query_db("SELECT dept_name, curriculum_url FROM department_curriculum")
-        return "\n".join([f"📂 {r[0]}: {r[1]}" for r in rows])
+        return "\n".join([f" {r[0]}: {r[1]}" for r in rows])
 
     elif table == "academic_calendar":
         rows = query_db(
@@ -118,7 +127,7 @@ def fetch_and_format(table, user_input):
     elif table == "teacher_education":
         rows = query_db("SELECT phase, course, credits, note FROM teacher_education")
         result = "\n\n".join([
-            f"👨‍🏫 [{r[0]}] {r[1]} ({r[2]}학점): {r[3]}"
+            f" [{r[0]}] {r[1]} ({r[2]}학점): {r[3]}"
             for r in rows
         ])
         return f"'{user_input}'에 대한 교적 이수 과목입니다:\n\n{result}"
@@ -131,7 +140,7 @@ def fetch_and_format(table, user_input):
         if not rows:
             return "장학금 정보를 찾지 못했습니다."
         result = "\n\n".join([
-            f"🎓 {r[1]} ({r[0]})\n- 신청기간: {r[2]} / 배부기간: {r[3]}"
+            f" {r[1]} ({r[0]})\n- 신청기간: {r[2]} / 배부기간: {r[3]}"
             f"\n- 자격: {r[4]}\n- 비고: {r[5]}"
             for r in rows
         ])
@@ -142,7 +151,7 @@ def fetch_and_format(table, user_input):
         if not rows:
             return "증명서 정보를 찾지 못했습니다."
         result = "\n\n".join([
-            f"📄 대상: {r[0]} / 부서: {r[1]}\n- 한국어: {r[2]} / 영어: {r[3]}"
+            f" 대상: {r[0]} / 부서: {r[1]}\n- 한국어: {r[2]} / 영어: {r[3]}"
             for r in rows
         ])
         return f"'{user_input}'에 대한 증명서 종류입니다:\n\n{result}"
@@ -285,5 +294,3 @@ def get_certificate_issuance():
 # ───────── 서버 기동 ─────────
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
-
