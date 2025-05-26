@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import openai
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -44,6 +45,10 @@ def extract_filters(user_input):
             filters["program"] = "건축학과"
         elif "약학" in user_input or "약대" in user_input:
             filters["program"] = "약학과"
+        else:
+            filters["program"] = "일반 학과"
+        if "entry_type" not in filters or "program" not in filters:
+            return None
 
     # 🍽️ 식당 추천
     elif any(kw in user_input for kw in [
@@ -66,35 +71,35 @@ def extract_filters(user_input):
     ]):
         filters["table"] = "department_curriculum"
 
-    if "인공지능" in user_input:
+    if "인공지능" in user_input or "인지융" in user_input:
         filters["dept_name"] = "인공지능융합학부"
-    elif "컴퓨터" in user_input or "컴퓨터공학" in user_input:
+    elif "컴퓨터" in user_input or "컴공" in user_input:
         filters["dept_name"] = "컴퓨터공학부"
-    elif "자유전공" in user_input or "자유전공학부" in user_input:
+    elif "자전" in user_input or "자유전공학부" in user_input:
         filters["dept_name"] = "자유전공학부"
-    elif "화학생명과학" in user_input or "화학생명과학부" in user_input:
+    elif "화생" in user_input or "화학생명과학" in user_input:
         filters["dept_name"] = "화학생명과학과"
     elif "데이터클라우드" in user_input or "데이터클라우드학부" in user_input:
         filters["dept_name"] = "데이터클라우드공학과"
-    elif "항공관광외국어" in user_input or "항공관광외국어학부" in user_input:
+    elif "항공" in user_input or "항공관광외국어학부" in user_input:
         filters["dept_name"] = "항공관광외국어학부"
-    elif "바이오융합공학" in user_input or "바이오융합공학부" in user_input:
+    elif "바이오" in user_input or "바이오융합공학부" in user_input:
         filters["dept_name"] = "바이오융합공학과"
     elif "체육" in user_input or "체육학부" in user_input:
         filters["dept_name"] = "체육학과"
-    elif "물리치료" in user_input or "물리치료학부" in user_input:
+    elif "물치" in user_input or "물리치료" in user_input:
         filters["dept_name"] = "물리치료학과"
-    elif "상담심리" in user_input or "상담심리학부" in user_input:
+    elif "상심" in user_input or "상담심리학부" in user_input:
         filters["dept_name"] = "상담심리학과"
-    elif "아트앤디자인" in user_input or "아트앤디자인학부" in user_input:
+    elif "아디" in user_input or "아트앤디자인학부" in user_input:
         filters["dept_name"] = "아트앤디자인학과"
-    elif "보건관리" in user_input or "보건관리학부" in user_input:
+    elif "보건" in user_input or "보건관리" in user_input:
         filters["dept_name"] = "보건관리학과"
-    elif "환경디자인원예" in user_input or "환경디자인원예학부" in user_input:
+    elif "환디" in user_input or "환경디자인" in user_input:
         filters["dept_name"] = "환경디자인원예학과"
-    elif "식품영양" in user_input or "식품영양학부" in user_input:
+    elif "식영" in user_input or "식품영양" in user_input:
         filters["dept_name"] = "식품영양학과"
-    elif "동물자원" in user_input or "동물자원학부" in user_input:
+    elif "동생자" in user_input or "동물자원" in user_input or "동물생명" in user_input:
         filters["dept_name"] = "동물자원학과"
     elif "약학" in user_input or "약대" in user_input:
         filters["dept_name"] = "약학과"
@@ -107,6 +112,9 @@ def extract_filters(user_input):
         "휴강일", "공휴일", "수업일정", "종강", "학사캘린더"
     ]):
         filters["table"] = "academic_calendar"
+        match = re.search(r"(\d{1,2})월", user_input)
+        if match:
+            filters["month"] = int(match.group(1))
 
     # # 👨‍🏫 교직 이수
     # elif any(kw in user_input for kw in [
@@ -125,7 +133,7 @@ def extract_filters(user_input):
     elif any(kw in user_input for kw in [
         "증명서 발급", "무인 발급기", "팩스 발급", "인터넷 발급", "우편 발급", 
         "발급 방법", "신청 방법", "서류 받는 법", "학교에서 받는 법", "증명서 신청",
-        "어디서 발급", "발급 시간"
+        "어디서 발급", "발급 시간", "증명서"
     ]):
         filters["table"] = "certificate_issuance"
     
@@ -135,6 +143,11 @@ def extract_filters(user_input):
         "서류", "학교 서류", "확인서", "영문 증명서", "한글 증명서", "증빙서류"
     ]):
         filters["table"] = "certificates"
+
+    # graduation_credits만 조건 필수
+    if filters.get("table") == "graduation_credits":
+        if "entry_type" not in filters or "program" not in filters:
+            return None
 
     return filters if "table" in filters else None
 
