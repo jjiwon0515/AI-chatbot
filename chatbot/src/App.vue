@@ -89,7 +89,7 @@ const sendMessage = async () => {
   }
 
    // 🛑 학교 관련 키워드 없으면 차단 응답
-    if (isRelatedToSchool(text)) {
+    if (!isRelatedToSchool(text)) {
       botReplies.value[currentIndex] = '죄송해요! 수아는 삼육대학교 관련 질문만 도와드릴 수 있어요 😊'
       scrollToBottom()
       return
