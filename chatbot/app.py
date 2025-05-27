@@ -36,31 +36,7 @@ def extract_filters(user_input):
             filters["entry_type"] = "신입"
         elif "편입" in user_input or "편입생" in user_input:
             filters["entry_type"] = "편입"
-        elif "전과" in user_input or "학과 변경" in user_input:
-            filters["entry_type"] = "전과"
-
-        if "인공지능" in user_input:
-            filters["program"] = "인공지능융합학부"
-        elif "건축" in user_input or "건축학" in user_input:
-            filters["program"] = "건축학과"
-        elif "약학" in user_input or "약대" in user_input:
-            filters["program"] = "약학과"
-        else:
-            filters["program"] = "일반 학과"
-        if "entry_type" not in filters or "program" not in filters:
-            return None
-
-    # 🍽️ 식당 추천
-    elif any(kw in user_input for kw in [
-        "식당", "맛집", "메뉴", "점심", "저녁", "밥", "뭐 먹지", "학교 근처 음식", 
-        "근처 맛집", "음식 추천", "가까운 식당", "카페", "혼밥", "식사 장소", "추천 식당"
-    ]):
-        filters["table"] = "restaurants"
-
-    # 📚 교양 과목
-    elif any(kw in user_input for kw in [
-        "교양", "교양 과목", "추천 과목", "인기 교양", "교양 추천", "쉬운 교양", 
-        "재밌는 교양", "과탑 교양", "교양 수업", "좋은 교양", "교양 선택", "교양 평가"
+        elif "전과" in user_input or천"
     ]):
         filters["table"] = "liberal_arts"
 
@@ -91,7 +67,7 @@ def extract_filters(user_input):
         filters["dept_name"] = "물리치료학과"
     elif "상심" in user_input or "상담심리학부" in user_input:
         filters["dept_name"] = "상담심리학과"
-    elif "아디" in user_input or "아트앤디자인학부" in user_input:
+    elif "아디" in user_input or "아트앤디자인학부" in user_input or "디자인" in user_input:
         filters["dept_name"] = "아트앤디자인학과"
     elif "보건" in user_input or "보건관리" in user_input:
         filters["dept_name"] = "보건관리학과"
