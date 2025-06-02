@@ -25,7 +25,7 @@ const isRelatedToSchool = (text) => {
 // 사전 정의된 응답
 const predefinedReplies = {
   '점심 메뉴 추천': '오늘의 점심 추천은 김치찌개, 제육볶음, 샐러드입니다!',
-  '학사일정': '2025학년도 1학기 개강: 3월 3일\n중간고사: 4월 22일 ~ 26일\n기말고사: 6월 10일 ~ 14일입니다.',
+  '학사일정': '☆ 2025학년도 학사일정 ☆<br>1학기 개강: 3월 3일<br>중간고사: 4월 22일 ~ 26일<br>기말고사: 6월 10일 ~ 14일입니다.',
   '커리큘럼': '삼육대학교 커리큘럼은 각 학과별로 다르며, 학교 홈페이지에서 확인하실 수 있습니다.',
   '졸업요건': '졸업을 위해서는 전공 이수 학점과 교양 과목을 포함한 총 130학점 이상이 필요합니다.',
 }
@@ -44,43 +44,43 @@ const sendMessage = async () => {
     await nextTick()
     scrollToBottom()
 
-    if (text === '안녕?') {
+    if (text === '안녕?' || text === '안녕' || text === '안녕.') {
   botReplies.value[currentIndex] = '안녕하세요😊 좋은 하루 입니다!'
   scrollToBottom()
   return
-  } else if (text === '이름이 뭐야?') {
+  } else if (text === '이름이 뭐야?' || text === '넌 누구야?') {
   botReplies.value[currentIndex] = '저는 삼육대학교 챗봇 수아입니다 :)'
   scrollToBottom()
   return
-  } else if (text === '뭐해?') {
+  } else if (text === '뭐해?' || text === '뭐하고있어?') {
   botReplies.value[currentIndex] = '대화하는 중 입니다~ 🗨️'
   scrollToBottom()
   return
-  } else if (text === '심심해') {
+  } else if (text === '심심해' || text === '뭐하지') {
   botReplies.value[currentIndex] = '저랑 수다 떨어요! 수다는 언제나 환영이에요 :)'
   scrollToBottom()
   return
-  } else if (text === '힘들어') {
+  } else if (text === '힘들어' || text === '지친다') {
   botReplies.value[currentIndex] = '제가 옆에 있어드릴게요! 같이 이겨내봐요 :)'
   scrollToBottom()
   return
-  } else if (text === '배고파') {
+  } else if (text === '배고파' || text === '꼬르륵') {
   botReplies.value[currentIndex] = '밥을 든든히 드셔야해요. 저랑 메뉴 얘기하실래요? 🍙'
   scrollToBottom()
   return
-  } else if (text === '바보야') {
+  } else if (text === '바보야' || text === '바보') {
   botReplies.value[currentIndex] = '으엥! 수아는 바보가 아니에요!!'
   scrollToBottom()
   return
-  } else if (text === '공부하기 싫어') {
+  } else if (text === '공부하기 싫어' || text === '일하기 싫어') {
   botReplies.value[currentIndex] = '수아도 가끔 그래요... 그래도 조금만 더 힘내봐요 💪'
   scrollToBottom()
   return
-  } else if (text === '오늘 날씨 어때?') {
+  } else if (text === '오늘 날씨 어때?' || text === '오늘 비가 올까?') {
   botReplies.value[currentIndex] = '날씨 정보는 아직 모르겠어요 :('
   scrollToBottom()
   return
-  } else if (text === '고마워') {
+  } else if (text === '고마워' || text === '땡큐') {
   botReplies.value[currentIndex] = '천만에요! 언제든지 필요하면 저를 찾아주세요 🙌'
   scrollToBottom()
   return
