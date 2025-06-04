@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # ───────── 설정 ─────────
-openai.api_key = "OPEN_API"  # OpenAI API 키 설정
+openai.api_key = "OPENAI_API_KEY"  # 여기에 OpenAI API 키를 입력하세요
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "unibot_extended.db")
 
@@ -133,7 +133,7 @@ def extract_filters(user_input):
 # ───────── 테이블별 fetch 및 포맷 ─────────
 def fetch_and_format(table, user_input, filters):
     def wrap_prompt(data_text):
-        return f"사용자 질문: '{user_input}'\n\n다음은 검색된 정보입니다:\n\n{data_text}\n\n위 내용을 바탕으로 자연스럽고 이해하기 쉽게 요약해서 설명해줘."
+        return f"사용자 질문: '{user_input}'\n\n다음은 검색된 정보입니다:\n\n{data_text}\n\n위 내용을 바탕으로 자연스럽고 이해하기 쉽게 요약해서 설명해줘. 그리고 링크가 있다면 링크도 함께 제공해줘"
 
     if table == "graduation_credits":
         sql = "SELECT * FROM graduation_credits WHERE 1=1"
@@ -158,6 +158,7 @@ def fetch_and_format(table, user_input, filters):
         if "dept_name" in filters:
             rows = query_db("SELECT dept_name, curriculum_url FROM department_curriculum WHERE dept_name LIKE ?",
                             (f"%{filters['dept_name']}%",))
+            print(rows)
         else:
             rows = query_db("SELECT dept_name, curriculum_url FROM department_curriculum")
         if not rows:
@@ -261,4 +262,4 @@ def ask():
 
 # ───────── 서버 기동 ─────────
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8081, debug=True)
+    app.run(host="localhost", port=8081, debug=True)
